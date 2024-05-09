@@ -1,10 +1,7 @@
-import {Express, Request, Response} from 'express'
+import {Request, Response} from 'express'
 import {prismaClient} from "../server";
-import { responseSend } from "../exceptions/errorHandling";
-import { hashSync, compareSync } from 'bcrypt';
-import { now } from "../utils/date";
-import { sign } from 'jsonwebtoken';
-import { JWT_SECRET } from "../env";
+import {responseSend} from "../exceptions/errorHandling";
+import {now} from "../utils/date";
 
 console.log('Role Controller Init');
 
@@ -12,24 +9,23 @@ export const createRole = async (req: Request, res: Response) => {
     try {
         const { roleName, roleDescription } = req.body;
 
-        let findRole = await prismaClient.role_master.findFirst({
-            where: {role_name: roleName}
-        })
+        let role = await prismaClient.role_master.findFirst({where: {role_name: roleName}})
 
-        if(findRole) {
+        if(role) {
             return responseSend(res, 'error', 'Role Already Exist');
         } else {
-            console.log('Role not found');
+            console.log('Role not found, continue');
         }
 
         // await prismaClient.$transaction(async (prisma) => {
-        const createRole = await prismaClient.team_master.create({
+        const createRole = await prismaClient.role_master.create({
             data: {
-                team_name: roleName,
-                team_description : roleDescription,
+                role_name : roleName,
+                role_description: roleDescription,
+                created_at : now,
                 created_by : 'admin',
                 updated_at : null,
-                updated_by : null,
+                updated_by : null
             }
         })
 
@@ -37,7 +33,7 @@ export const createRole = async (req: Request, res: Response) => {
         // })
 
     } catch (error) {
-        console.log('Error creating role:', error)
+        console.log('Error creating user:', error)
         await responseSend(res, 'error', error)
     }
 }

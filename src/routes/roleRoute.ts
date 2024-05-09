@@ -1,5 +1,5 @@
-import { Router } from 'express'
-import {createRole} from "../controllers/authController";
+import {Router} from 'express'
+import {createRole} from "../controllers/roleController";
 
 console.log('Role Route Init');
 

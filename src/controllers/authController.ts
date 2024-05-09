@@ -1,10 +1,10 @@
-import {Express, Request, Response} from 'express'
+import {Request, Response} from 'express'
 import {prismaClient} from "../server";
-import { responseSend } from "../exceptions/errorHandling";
-import { hashSync, compareSync } from 'bcrypt';
-import { now } from "../utils/date";
-import { sign } from 'jsonwebtoken';
-import { JWT_SECRET } from "../env";
+import {responseSend} from "../exceptions/errorHandling";
+import {compareSync, hashSync} from 'bcrypt';
+import {now} from "../utils/date";
+import {sign} from 'jsonwebtoken';
+import {JWT_SECRET} from "../env";
 
 console.log('Auth Controller Init');
 
@@ -65,9 +65,6 @@ export const RegisterUser = async (req: Request, res: Response) => {
 
     let alreadyRegister = await prismaClient.user_master.findFirst({where: {email}})
 
-    // const now = moment().format('YYYY-MM-DD HH:mm:ss');
-    let created_at = now;
-
     if(alreadyRegister) {
         throw Error('User Already Exist')
     }
@@ -100,9 +97,6 @@ export const RegisterAdmin = async (req: Request, res: Response) => {
 
         let admin = await prismaClient.admin_master.findFirst({where: {email}})
 
-        // const now = moment().format();
-        let created_at = now;
-
         if(admin) {
             return responseSend(res, 'error', 'User Already Exist');
         } else {
@@ -131,37 +125,4 @@ export const RegisterAdmin = async (req: Request, res: Response) => {
             console.log('Error creating user:', error)
             await responseSend(res, 'error', error)
         }
-}
-
-export const createRole = async (req: Request, res: Response) => {
-    try {
-        const { roleName, roleDescription } = req.body;
-
-        let role = await prismaClient.role_master.findFirst({where: {role_name: roleName}})
-
-        if(role) {
-            return responseSend(res, 'error', 'Role Already Exist');
-        } else {
-            console.log('Role not found, continue');
-        }
-
-        await prismaClient.$transaction(async (prisma) => {
-            const createRole = await prismaClient.role_master.create({
-                data: {
-                    role_name : roleName,
-                    role_description: roleDescription,
-                    created_at : now,
-                    created_by : 'admin',
-                    updated_at : null,
-                    updated_by : null
-                }
-            })
-
-            return responseSend(res,'', createRole);
-        })
-
-    } catch (error) {
-        console.log('Error creating user:', error)
-        await responseSend(res, 'error', error)
-    }
 }
