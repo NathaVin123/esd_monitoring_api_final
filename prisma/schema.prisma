@@ -1,0 +1,331 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model admin_master {
+  uuid      String @id @default(uuid())
+  nik       String @unique
+  email     String @unique
+  full_name String
+  password  String
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  @@index([email])
+}
+
+model user_master {
+  uuid                 String      @id @default(uuid())
+  role                 role_master @relation(fields: [role_master_id], references: [uuid])
+  role_master_id       String
+  team                 team_master @relation(fields: [team_master_id], references: [uuid])
+  team_master_id       String
+  nik                  String      @unique
+  email                String      @unique
+  full_name            String
+  password             String
+  gender               String
+  active_user          Boolean     @default(true)
+  session              String?
+  darkmode_enabled     Boolean     @default(false)
+  notification_enabled Boolean     @default(false)
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  active_user_monitoring active_user_monitoring[]
+  project_master         project_master[]
+  user_project           user_project[]
+
+  @@index([nik, email, password])
+}
+
+model team_master {
+  uuid             String  @id @default(uuid())
+  team_name        String  @unique
+  team_description String?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  user_master user_master[]
+
+  @@index([team_name])
+}
+
+model role_master {
+  uuid             String  @id @default(uuid())
+  role_name        String  @unique
+  role_description String?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  user_master user_master[]
+
+  @@index([role_name])
+}
+
+model status_master {
+  uuid               String  @id @default(uuid())
+  status_name        String  @unique
+  status_description String?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  project_master project_master[]
+  case_master    case_master[]
+  task_master    task_master[]
+
+  @@index([status_name])
+}
+
+model project_master {
+  uuid                String         @id @default(uuid())
+  project_tcode       String         @unique
+  project_name        String         @unique
+  project_description String?
+  sa_leader           user_master?   @relation(fields: [sa_leader_id], references: [uuid])
+  sa_leader_id        String?
+  start_date          DateTime
+  end_date            DateTime?
+  status              status_master? @relation(fields: [status_master_id], references: [uuid])
+  status_master_id    String?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  menu_master  menu_master[]
+  user_project user_project[]
+
+  @@index([project_tcode, project_name])
+}
+
+model user_project {
+  uuid              String         @id @default(uuid())
+  project           project_master @relation(fields: [project_master_id], references: [uuid])
+  project_master_id String
+  user_id           user_master    @relation(fields: [user_master_id], references: [uuid])
+  user_master_id    String
+
+  created_at  DateTime      @default(now())
+  created_by  String
+  updated_at  DateTime?
+  updated_by  String?
+  case_master case_master[]
+}
+
+model menu_master {
+  uuid              String         @id @default(uuid())
+  menu_tcode        String
+  menu_name         String
+  menu_description  String?
+  project           project_master @relation(fields: [project_master_id], references: [uuid])
+  project_master_id String
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  task_master task_master[]
+}
+
+model task_master {
+  uuid             String        @id @default(uuid())
+  task_name        String
+  task_description String?
+  menu             menu_master   @relation(fields: [menu_master_id], references: [uuid])
+  menu_master_id   String
+  status           status_master @relation(fields: [status_master_id], references: [uuid])
+  status_master_id String
+
+  created_at             DateTime                 @default(now())
+  created_by             String
+  updated_at             DateTime?
+  updated_by             String?
+  active_user_monitoring active_user_monitoring[]
+  case_master            case_master[]
+}
+
+model task_master_hist {
+  uuid             String    @id @default(uuid())
+  task_name        String
+  task_description String?
+  user_master_id   String?
+  menu_master_id   String?
+  status_master_id String?
+  start_date       DateTime?
+  end_date         DateTime?
+  duration         BigInt?
+  action           String?
+
+  created_at DateTime @default(now())
+  created_by String
+}
+
+model case_master {
+  uuid             String        @id @default(uuid())
+  case_name        String
+  case_description String?
+  task             task_master   @relation(fields: [task_master_id], references: [uuid])
+  task_master_id   String
+  status           status_master @relation(fields: [status_master_id], references: [uuid])
+  status_master_id String
+  user_project     user_project? @relation(fields: [user_project_id], references: [uuid])
+  user_project_id  String?
+  start_date       DateTime
+  end_date         DateTime?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+
+  active_user_monitoring active_user_monitoring[]
+}
+
+model case_master_hist {
+  uuid              String    @id @default(uuid())
+  case_id           String?
+  case_name         String?
+  case_description  String?
+  task_master_id    String?
+  status_master_id  String?
+  project_master_id String?
+  user_project_id   String?
+  start_date        DateTime
+  end_date          DateTime?
+  duration          BigInt?
+  action            String?
+
+  created_at DateTime @default(now())
+  created_by String
+}
+
+model active_user_monitoring {
+  uuid           String      @id @default(uuid())
+  user           user_master @relation(fields: [user_master_id], references: [uuid])
+  user_master_id String
+  task           task_master @relation(fields: [task_master_id], references: [uuid])
+  task_master_id String
+  case           case_master @relation(fields: [case_master_id], references: [uuid])
+  case_master_id String
+  remark         String?
+  start_time     DateTime    @default(now())
+  end_time       DateTime?
+  active         Boolean
+  status         String      @default("")
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+}
+
+model active_user_monitoring_hist {
+  uuid                      String    @id @default(uuid())
+  active_user_monitoring_id String
+  user_master_id            String?
+  task_master_id            String?
+  case_master_id            String?
+  remark                    String?
+  start_time                DateTime?
+  end_time                  DateTime?
+  active                    Boolean?
+  duration                  Int?
+  action                    String?
+
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
+}
+
+// model project_history {
+//   uuid              String         @id @default(uuid())
+//   project_id        project_master @relation(fields: [project_master_id], references: [uuid])
+//   project_master_id String
+//   sa_leader_id      user_master    @relation(fields: [user_master_id], references: [uuid])
+//   user_master_id    String
+//   description       String
+//   start_date        DateTime
+//   end_date          DateTime
+//   status            String
+//   action            String         @default("CREATED")
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+// }
+// model project {
+//   uuid              String         @id @default(uuid())
+//   project_id        project_master @relation(fields: [project_master_id], references: [uuid])
+//   project_master_id String
+//   sa_leader_id      user_master    @relation(fields: [user_master_id], references: [uuid])
+//   user_master_id    String
+//   description       String
+//   start_date        DateTime
+//   end_date          DateTime
+//   status            String         @default("Not Started")
+//   document_attach   Bytes
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+// }
+//
+// model project_member {
+//   uuid              String          @id @default(uuid())
+//   project_id        project_master? @relation(fields: [project_master_id], references: [uuid])
+//   project_master_id String?
+//   team_id           team_master?    @relation(fields: [team_master_id], references: [uuid])
+//   team_master_id    String?
+//   user_id           user_master     @relation(fields: [user_master_id], references: [uuid])
+//   user_master_id    String
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+// }
+
+// model user_settings {
+//   uuid                    String  @id @default(uuid())
+//   is_dark_mode            Boolean @default(false)
+//   is_notification_enabled Boolean @default(false)
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+//
+//   user_master user_master[]
+// }
