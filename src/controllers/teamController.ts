@@ -1,10 +1,6 @@
-import {Express, Request, Response} from 'express'
+import {Request, Response} from 'express'
 import {prismaClient} from "../server";
-import { responseSend } from "../exceptions/errorHandling";
-import { hashSync, compareSync } from 'bcrypt';
-import { now } from "../utils/date"
-import { sign } from 'jsonwebtoken'
-import { JWT_SECRET } from "../env";
+import {responseSend} from "../exceptions/errorHandling";
 
 console.log('Team Controller Init');
 
@@ -37,5 +33,22 @@ export const createTeam = async (req: Request, res: Response) => {
     } catch (error) {
         console.log('Error creating team:', error)
         await responseSend(res, 'error', error)
+    }
+}
+
+export const getTeam = async (req: Request, res: Response) => {
+    // const {} = req.body;
+
+    try {
+        let team = await prismaClient.team_master.findMany();
+
+        if(team) {
+            return responseSend(res, 'success', 'Get Team Success', team);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get team');
+        }
+    } catch (error) {
+        console.log('Error get team:', error);
+        await responseSend(res, 'error', error);
     }
 }

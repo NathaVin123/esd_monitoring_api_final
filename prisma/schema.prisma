@@ -39,6 +39,7 @@ model user_master {
   full_name            String
   password             String
   gender               String
+  profile_photo        Bytes?
   active_user          Boolean     @default(true)
   session              String?
   darkmode_enabled     Boolean     @default(false)
