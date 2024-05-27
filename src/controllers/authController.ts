@@ -77,7 +77,7 @@ export const LoginUser = async (req: Request, res: Response) => {
 
 export const RegisterUser = async (req: Request, res: Response) => {
     try {
-        const { roleId, teamId, nik, email, full_name, gender, password, activeUser, session } = req.body;
+        const { roleId, teamId, nik, email, full_name, gender, password, activeUser } = req.body;
 
         let alreadyRegister = await prismaClient.user_master.findFirst({where: {email}})
 
@@ -96,10 +96,9 @@ export const RegisterUser = async (req: Request, res: Response) => {
                 password: hashSync(password, 30),
                 gender : gender,
                 active_user : activeUser,
-                session : session,
+                session : null,
                 created_at : now,
                 created_by : 'admin',
-                updated_at : ''
             }
         })
         console.log(createUser)

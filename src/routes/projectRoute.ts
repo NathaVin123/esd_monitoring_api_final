@@ -1,14 +1,47 @@
 import {Router} from 'express'
-import {GetToken, LoginUser, RegisterAdmin, RegisterUser} from "../controllers/authController";
+import {
+    createMenu,
+    createProject,
+    createTask,
+    deleteMenu,
+    deleteProject,
+    deleteTask,
+    editMenu,
+    editTask,
+    getMenu,
+    getProject,
+    getTask,
+    updateProject
+} from "../controllers/projectController";
 
-const authRoutes = Router()
+const projectRoutes = Router()
 
-console.log('Auth Route Init');
+console.log('Project Route Init');
 
-authRoutes.get('/getToken', GetToken)
+// CRUD Project
+projectRoutes.get('/getProject', getProject)
+projectRoutes.post('/createProject', createProject)
+projectRoutes.post('/updateProject', updateProject)
+projectRoutes.delete('/deleteProject', deleteProject)
 
-authRoutes.post('/loginUser', LoginUser)
-authRoutes.post('/registerUser', RegisterUser)
-authRoutes.post('/registerAdmin', RegisterAdmin)
+// CRUD Menu
+projectRoutes.get('/getMenu', getMenu)
+projectRoutes.post('/createMenu', createMenu)
+projectRoutes.post('/editMenu', editMenu)
+projectRoutes.delete('/deleteMenu', deleteMenu)
 
-export default authRoutes
+// CRUD Task
+projectRoutes.get('/getTask', getTask)
+projectRoutes.post('/createTask', createTask)
+projectRoutes.post('/editTask', editTask)
+projectRoutes.delete('/deleteTask', deleteTask)
+
+// CRUD Case
+projectRoutes.get('/getTask', getTask)
+projectRoutes.post('/createTask', createTask)
+projectRoutes.post('/editTask', editTask)
+projectRoutes.delete('/deleteTask', deleteTask)
+
+
+
+export default projectRoutes

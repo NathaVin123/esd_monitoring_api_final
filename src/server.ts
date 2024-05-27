@@ -1,6 +1,6 @@
 import express, {Request, Response} from 'express'
 import {PrismaClient} from "@prisma/client";
-import {PORT, URL_DEV_LOCAL} from './env';
+import {PORT, URL} from './env';
 import rootRoutes from "./routes/rootRoute";
 import {errorMiddleware} from "./middlewares/error";
 import cors from 'cors';
@@ -26,5 +26,5 @@ app.get('/', (req: Request, res: Response) => {
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
-    console.log(`Server run successfully in http://${URL_DEV_LOCAL}:${PORT}`)
+    console.log(`Server run successfully in http://${URL}:${PORT}`)
 })
