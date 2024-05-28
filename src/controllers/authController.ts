@@ -5,7 +5,6 @@ import {compareSync, hashSync} from 'bcrypt';
 import {now} from "../utils/date";
 import jwt, {sign} from 'jsonwebtoken';
 import {JWT_SECRET} from "../env";
-import {setCookie} from 'nookies';
 
 console.log('Auth Controller Init');
 
@@ -52,16 +51,16 @@ export const LoginUser = async (req: Request, res: Response) => {
 
         const token: string = sign({
             userId: findUserNIK.uuid
-        }, JWT_SECRET)
+        }, JWT_SECRET, { expiresIn: '2h' })
 
-        setCookie({ res }, 'token', token, {
-            httpOnly: true, // more secure, can't be accessed by JavaScript
-            // secure: process.env.NODE_ENV === 'production', // use HTTPS in production
-            maxAge: 30 * 24 * 60 * 60, // 30 days
-            path: '/',
-        });
-
-        console.log(token);
+        // setCookie({ res }, 'token', token, {
+        //     httpOnly: true, // more secure, can't be accessed by JavaScript
+        //     // secure: process.env.NODE_ENV === 'production', // use HTTPS in production
+        //     maxAge: 30 * 24 * 60 * 60, // 30 days
+        //     path: '/',
+        // });
+        //
+        // console.log(token);
 
         return responseSend(res, 'success', 'Login Succesfully', {
             token: token
