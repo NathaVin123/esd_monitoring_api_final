@@ -27,7 +27,7 @@ export const GetToken = async (req: Request, res: Response) => {
         console.log(error);
         return responseSend(res, 'error', error);
     } finally {
-        prismaClient.$disconnect();
+        await prismaClient.$disconnect();
     }
 }
 
@@ -63,6 +63,7 @@ export const LoginUser = async (req: Request, res: Response) => {
         // console.log(token);
 
         return responseSend(res, 'success', 'Login Succesfully', {
+            nik: findUserNIK.nik,
             token: token
         })
 
@@ -70,7 +71,7 @@ export const LoginUser = async (req: Request, res: Response) => {
         console.log(error);
         return responseSend(res, 'error', error);
     } finally {
-        prismaClient.$disconnect();
+        await prismaClient.$disconnect();
     }
 }
 
@@ -134,7 +135,7 @@ export const LoginAdmin = async (req: Request, res: Response) => {
         console.log(error);
         return responseSend(res, 'exception', error);
     } finally {
-        prismaClient.$disconnect();
+        await prismaClient.$disconnect();
     }
 }
 

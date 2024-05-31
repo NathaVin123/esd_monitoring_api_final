@@ -75,3 +75,22 @@ export const GetUserWithRole = async (req: Request, res: Response) => {
         return responseSend(res, 'exception', error);
     }
 }
+
+export const GetAllUser = async (req: Request, res: Response) => {
+    try {
+        // const {nik} = req.body;
+
+        let findUserAll = await prismaClient.user_master.findMany({
+            include: {
+                role: true,
+                team: true,
+            }
+        });
+
+        return responseSend(res, 'success', 'Get User Success', findUserAll);
+
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'exception', error);
+    }
+}
