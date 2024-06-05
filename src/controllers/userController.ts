@@ -24,13 +24,13 @@ export const CreateUser = async (req: Request, res: Response)=> {
 
         const createUser = await prismaClient.user_master.create({
             data: {
-                role_master_id: '92c7c162-a38f-48eb-95f7-d5cb24dab534',
-                team_master_id : 'd5758b8d-5882-420c-9241-2edf4e9e7451',
+                role_master_id: roleId,
+                team_master_id : teamId,
                 nik : nik,
                 email : email,
-                full_name : 'admin1',
+                full_name : fullName,
                 password: hashSync(password, 10),
-                gender : 'L',
+                gender : gender,
                 active_user : true,
                 darkmode_enabled : true,
                 notification_enabled : true,
@@ -42,7 +42,6 @@ export const CreateUser = async (req: Request, res: Response)=> {
             }
         })
         console.log(createUser)
-        // res.json(createUser)
 
         return responseSend(res, 'success', 'Create user successfully');
 
@@ -88,6 +87,59 @@ export const GetAllUser = async (req: Request, res: Response) => {
         });
 
         return responseSend(res, 'success', 'Get User Success', findUserAll);
+
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'exception', error);
+    }
+}
+
+export const UpdateUser = async (req: Request, res: Response) => {
+    try {
+        const {nik, roleId, teamId, email, fullName, password, gender} = req.body;
+
+        let updateUser = await prismaClient.user_master.update({
+            where: {
+                nik: nik,
+            },
+            data: {
+                role_master_id: roleId,
+                team_master_id : teamId,
+                nik : nik,
+                email : email,
+                full_name : fullName,
+                password: hashSync(password, 10),
+                gender : gender,
+                active_user : true,
+                // darkmode_enabled : true,
+                // notification_enabled : true,
+                // session : null,
+                // created_at : now,
+                // created_by : 'admin',
+                updated_at : now,
+                updated_by : 'admin'
+            },
+        });
+
+        return responseSend(res, 'success', 'Update User Success', updateUser);
+
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'exception', error);
+    }
+}
+
+export const DeleteUser = async (req: Request, res: Response) => {
+    try {
+        const {nik} = req.body;
+
+        let deleteUser = await prismaClient.user_master.delete({
+            where: {
+                nik: nik,
+            },
+        });
+
+        return responseSend(res, 'success', 'Delete User Success', deleteUser);
 
     } catch (error) {
         console.log(error);
