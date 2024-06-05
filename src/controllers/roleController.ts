@@ -54,3 +54,59 @@ export const getRole = async (req: Request, res: Response) => {
         await responseSend(res, 'error', error);
     }
 }
+
+export const UpdateRole = async (req: Request, res: Response) => {
+    const {uuid, roleName, roleDescription} = req.body;
+
+    try {
+        let updateRole = await prismaClient.role_master.update(
+            {
+                where: {
+                    uuid: uuid
+                },
+                data: {
+                    role_name: roleName,
+                    role_description: roleDescription,
+                    updated_by: 'admin',
+                    updated_at: now,
+                }
+            }
+        );
+
+        if(updateRole) {
+            return responseSend(res, 'success', 'Update Role Success', updateRole);
+
+        } else {
+            return responseSend(res, 'error', 'Something wrong update role');
+        }
+
+    } catch (error) {
+        console.log('Error update role:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const DeleteTeam = async (req: Request, res: Response) => {
+    const {uuid} = req.body;
+
+    try {
+        let deleteRole = await prismaClient.team_master.delete(
+            {
+                where: {
+                    uuid: uuid
+                }
+            }
+        );
+
+        if(deleteRole) {
+            return responseSend(res, 'success', 'Delete Role Success', deleteRole);
+
+        } else {
+            return responseSend(res, 'error', 'Something wrong delete Role');
+        }
+
+    } catch (error) {
+        console.log('Error delete Role:', error);
+        await responseSend(res, 'error', error);
+    }
+}
