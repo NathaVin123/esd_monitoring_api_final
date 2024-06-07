@@ -54,7 +54,24 @@ export const getTeam = async (req: Request, res: Response) => {
     }
 }
 
-export const UpdateTeam = async (req: Request, res: Response) => {
+export const getAllTeam = async (req: Request, res: Response) => {
+    // const {} = req.body;
+
+    try {
+        let team = await prismaClient.team_master.findMany();
+
+        if(team) {
+            return responseSend(res, 'success', 'Get Team Success', team);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get team');
+        }
+    } catch (error) {
+        console.log('Error get team:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const updateTeam = async (req: Request, res: Response) => {
     const {uuid, teamName, teamDescription} = req.body;
 
     try {
@@ -85,7 +102,7 @@ export const UpdateTeam = async (req: Request, res: Response) => {
     }
 }
 
-export const DeleteTeam = async (req: Request, res: Response) => {
+export const deleteTeam = async (req: Request, res: Response) => {
     const {uuid} = req.body;
 
     try {

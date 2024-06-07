@@ -39,7 +39,7 @@ export const createRole = async (req: Request, res: Response) => {
 }
 
 export const getRole = async (req: Request, res: Response) => {
-    const {} = req.body;
+    // const {} = req.body;
 
     try {
         let role = await prismaClient.role_master.findMany();
@@ -55,7 +55,24 @@ export const getRole = async (req: Request, res: Response) => {
     }
 }
 
-export const UpdateRole = async (req: Request, res: Response) => {
+export const getAllRole = async (req: Request, res: Response) => {
+    // const {} = req.body;
+
+    try {
+        let role = await prismaClient.role_master.findMany();
+
+        if(role) {
+            return responseSend(res, 'success', 'Get Role Success', role);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get role');
+        }
+    } catch (error) {
+        console.log('Error get role:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const updateRole = async (req: Request, res: Response) => {
     const {uuid, roleName, roleDescription} = req.body;
 
     try {
@@ -86,7 +103,7 @@ export const UpdateRole = async (req: Request, res: Response) => {
     }
 }
 
-export const DeleteTeam = async (req: Request, res: Response) => {
+export const deleteTeam = async (req: Request, res: Response) => {
     const {uuid} = req.body;
 
     try {

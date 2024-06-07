@@ -11,6 +11,10 @@ export const CreateUser = async (req: Request, res: Response)=> {
 
         const {roleId, teamId, nik, email, fullName, password, gender, activeUser, createdBy} = req.body;
 
+        console.log(req.body);
+
+        console.log('Nik : '+nik);
+
         let findUserNIK = await prismaClient.user_master.findFirst({
             where: { nik }
         })
@@ -19,7 +23,7 @@ export const CreateUser = async (req: Request, res: Response)=> {
         if(findUserNIK) {
             return responseSend(res, 'error', 'User Already Exist!');
         } else {
-            console.log('User not found');
+            // console.log('User not found');
         }
 
         const createUser = await prismaClient.user_master.create({
@@ -31,12 +35,12 @@ export const CreateUser = async (req: Request, res: Response)=> {
                 full_name : fullName,
                 password: hashSync(password, 10),
                 gender : gender,
-                active_user : true,
+                active_user : activeUser,
                 darkmode_enabled : true,
                 notification_enabled : true,
                 session : null,
                 created_at : now,
-                created_by : 'admin',
+                created_by : createdBy,
                 updated_at : null,
                 updated_by : null
             }
@@ -86,6 +90,8 @@ export const GetAllUser = async (req: Request, res: Response) => {
             }
         });
 
+        console.log(findUserAll);
+
         return responseSend(res, 'success', 'Get User Success', findUserAll);
 
     } catch (error) {
@@ -111,11 +117,6 @@ export const UpdateUser = async (req: Request, res: Response) => {
                 password: hashSync(password, 10),
                 gender : gender,
                 active_user : true,
-                // darkmode_enabled : true,
-                // notification_enabled : true,
-                // session : null,
-                // created_at : now,
-                // created_by : 'admin',
                 updated_at : now,
                 updated_by : 'admin'
             },
