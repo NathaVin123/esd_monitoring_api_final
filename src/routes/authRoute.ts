@@ -1,11 +1,13 @@
 import {Router} from 'express'
-import {GetToken, LoginUser, RegisterAdmin, RegisterUser} from "../controllers/authController";
+import {CheckConnectivity, GetToken, LoginUser, RegisterAdmin, RegisterUser} from "../controllers/authController";
 
 const authRoutes = Router()
 
 console.log('Auth Route Init');
 
 authRoutes.get('/getToken', GetToken)
+
+authRoutes.get('/checkConnectivity', CheckConnectivity)
 
 authRoutes.post('/loginUser', LoginUser)
 authRoutes.post('/registerUser', RegisterUser)

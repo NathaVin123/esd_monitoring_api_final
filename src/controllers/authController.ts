@@ -31,6 +31,15 @@ export const GetToken = async (req: Request, res: Response) => {
     }
 }
 
+export const CheckConnectivity = async (req: Request, res: Response) => {
+    try {
+        return responseSend(res, '', 'Connect into the server...');
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'error', error);
+    }
+}
+
 export const LoginUser = async (req: Request, res: Response) => {
     try {
         const { nik, password } = req.body;
