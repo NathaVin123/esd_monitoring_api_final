@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import {CheckConnectivity, GetToken, LoginUser, RegisterAdmin, RegisterUser} from "../controllers/authController";
+import {CheckConnectivity, GetToken, LoginUser, RegisterUser} from "../controllers/authController";
 
 const authRoutes = Router()
 
@@ -11,6 +11,5 @@ authRoutes.get('/checkConnectivity', CheckConnectivity)
 
 authRoutes.post('/loginUser', LoginUser)
 authRoutes.post('/registerUser', RegisterUser)
-authRoutes.post('/registerAdmin', RegisterAdmin)
 
 export default authRoutes

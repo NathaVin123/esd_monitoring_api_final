@@ -5,7 +5,7 @@ import {now} from "../utils/date";
 
 console.log('Team Controller Init');
 
-export const createTeam = async (req: Request, res: Response) => {
+export const CreateTeam = async (req: Request, res: Response) => {
     try {
         const { teamName, teamDescription } = req.body;
 
@@ -37,8 +37,28 @@ export const createTeam = async (req: Request, res: Response) => {
     }
 }
 
-export const getTeam = async (req: Request, res: Response) => {
-    // const {} = req.body;
+export const GetTeam = async (req: Request, res: Response) => {
+    const {uuid} = req.body;
+
+    try {
+        let team = await prismaClient.team_master.findFirst({
+            where: {
+                uuid: uuid,
+            }
+        });
+
+        if(team) {
+            return responseSend(res, 'success', 'Get Team Success', team);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get team');
+        }
+    } catch (error) {
+        console.log('Error get team:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const GetAllTeam = async (req: Request, res: Response) => {
 
     try {
         let team = await prismaClient.team_master.findMany();
@@ -54,24 +74,7 @@ export const getTeam = async (req: Request, res: Response) => {
     }
 }
 
-export const getAllTeam = async (req: Request, res: Response) => {
-    // const {} = req.body;
-
-    try {
-        let team = await prismaClient.team_master.findMany();
-
-        if(team) {
-            return responseSend(res, 'success', 'Get Team Success', team);
-        } else {
-            return responseSend(res, 'error', 'Something wrong get team');
-        }
-    } catch (error) {
-        console.log('Error get team:', error);
-        await responseSend(res, 'error', error);
-    }
-}
-
-export const updateTeam = async (req: Request, res: Response) => {
+export const UpdateTeam = async (req: Request, res: Response) => {
     const {uuid, teamName, teamDescription} = req.body;
 
     try {
@@ -91,7 +94,6 @@ export const updateTeam = async (req: Request, res: Response) => {
 
         if(updateTeam) {
             return responseSend(res, 'success', 'Update Team Success', updateTeam);
-
         } else {
             return responseSend(res, 'error', 'Something wrong update team');
         }
@@ -102,10 +104,20 @@ export const updateTeam = async (req: Request, res: Response) => {
     }
 }
 
-export const deleteTeam = async (req: Request, res: Response) => {
+export const DeleteTeam = async (req: Request, res: Response) => {
     const {uuid} = req.body;
 
     try {
+        let findUserTeam = await prismaClient.user_master.findFirst({
+            where: {
+                team_master_id : uuid,
+            }
+        });
+
+        if(findUserTeam) {
+            return responseSend(res, 'error', 'Cannot delete team, user in team exist');
+        }
+
         let deleteTeam = await prismaClient.team_master.delete(
             {
                 where: {
@@ -116,7 +128,6 @@ export const deleteTeam = async (req: Request, res: Response) => {
 
         if(deleteTeam) {
             return responseSend(res, 'success', 'Delete Team Success', deleteTeam);
-
         } else {
             return responseSend(res, 'error', 'Something wrong delete team');
         }

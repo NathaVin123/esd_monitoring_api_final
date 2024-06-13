@@ -13,21 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model admin_master {
-  uuid      String @id @default(uuid())
-  nik       String @unique
-  email     String @unique
-  full_name String
-  password  String
-
-  created_at DateTime  @default(now())
-  created_by String
-  updated_at DateTime?
-  updated_by String?
-
-  @@index([email])
-}
-
 model user_master {
   uuid                 String      @id @default(uuid())
   role                 role_master @relation(fields: [role_master_id], references: [uuid])
@@ -121,8 +106,10 @@ model project_master {
   updated_at DateTime?
   updated_by String?
 
-  menu_master  menu_master[]
   user_project user_project[]
+
+  task_master task_master[]
+  case_master case_master[]
 
   @@index([project_tcode, project_name])
 }
@@ -134,56 +121,41 @@ model user_project {
   user_id           user_master    @relation(fields: [user_master_id], references: [uuid])
   user_master_id    String
 
-  created_at  DateTime      @default(now())
-  created_by  String
-  updated_at  DateTime?
-  updated_by  String?
-  case_master case_master[]
+  created_at DateTime  @default(now())
+  created_by String
+  updated_at DateTime?
+  updated_by String?
 }
 
-model menu_master {
+model task_master {
   uuid              String         @id @default(uuid())
-  menu_tcode        String
-  menu_name         String
-  menu_description  String?
+  task_name         String
+  task_description  String?
   project           project_master @relation(fields: [project_master_id], references: [uuid])
   project_master_id String
+  status            status_master  @relation(fields: [status_master_id], references: [uuid])
+  status_master_id  String
+  start_date        DateTime       @default(now())
+  end_date          DateTime?
+  progress          Int            @default(0)
 
   created_at DateTime  @default(now())
   created_by String
   updated_at DateTime?
   updated_by String?
 
-  task_master task_master[]
-}
-
-model task_master {
-  uuid             String        @id @default(uuid())
-  task_name        String
-  task_description String?
-  menu             menu_master   @relation(fields: [menu_master_id], references: [uuid])
-  menu_master_id   String
-  status           status_master @relation(fields: [status_master_id], references: [uuid])
-  status_master_id String
-
-  created_at             DateTime                 @default(now())
-  created_by             String
-  updated_at             DateTime?
-  updated_by             String?
   active_user_monitoring active_user_monitoring[]
-  case_master            case_master[]
 }
 
 model task_master_hist {
   uuid             String    @id @default(uuid())
   task_name        String
   task_description String?
-  user_master_id   String?
-  menu_master_id   String?
   status_master_id String?
+  user_master_id   String?
   start_date       DateTime?
   end_date         DateTime?
-  duration         BigInt?
+  progress         BigInt    @default(0)
   action           String?
 
   created_at DateTime @default(now())
@@ -191,17 +163,16 @@ model task_master_hist {
 }
 
 model case_master {
-  uuid             String        @id @default(uuid())
-  case_name        String
-  case_description String?
-  task             task_master   @relation(fields: [task_master_id], references: [uuid])
-  task_master_id   String
-  status           status_master @relation(fields: [status_master_id], references: [uuid])
-  status_master_id String
-  user_project     user_project? @relation(fields: [user_project_id], references: [uuid])
-  user_project_id  String?
-  start_date       DateTime
-  end_date         DateTime?
+  uuid              String         @id @default(uuid())
+  case_name         String
+  case_description  String?
+  project           project_master @relation(fields: [project_master_id], references: [uuid])
+  project_master_id String
+  status            status_master  @relation(fields: [status_master_id], references: [uuid])
+  status_master_id  String
+  start_date        DateTime       @default(now())
+  end_date          DateTime?
+  progress          Int            @default(0)
 
   created_at DateTime  @default(now())
   created_by String
@@ -220,9 +191,9 @@ model case_master_hist {
   status_master_id  String?
   project_master_id String?
   user_project_id   String?
-  start_date        DateTime
+  start_date        DateTime  @default(now())
   end_date          DateTime?
-  duration          BigInt?
+  progress          BigInt    @default(0)
   action            String?
 
   created_at DateTime @default(now())
@@ -259,7 +230,7 @@ model active_user_monitoring_hist {
   start_time                DateTime?
   end_time                  DateTime?
   active                    Boolean?
-  duration                  Int?
+  status                    String    @default("")
   action                    String?
 
   created_at DateTime  @default(now())
@@ -329,4 +300,35 @@ model active_user_monitoring_hist {
 //   updated_by String?
 //
 //   user_master user_master[]
+// }
+
+// model menu_master {
+//   uuid              String         @id @default(uuid())
+//   menu_tcode        String
+//   menu_name         String
+//   menu_description  String?
+//   project           project_master @relation(fields: [project_master_id], references: [uuid])
+//   project_master_id String
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+//
+//   task_master task_master[]
+// }
+
+// model admin_master {
+//   uuid      String @id @default(uuid())
+//   nik       String @unique
+//   email     String @unique
+//   full_name String
+//   password  String
+//
+//   created_at DateTime  @default(now())
+//   created_by String
+//   updated_at DateTime?
+//   updated_by String?
+//
+//   @@index([email])
 // }

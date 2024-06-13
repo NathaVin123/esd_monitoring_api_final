@@ -1,13 +1,15 @@
 import {Router} from 'express'
-import {createTeam, getAllTeam, getTeam} from "../controllers/teamController";
+import {CreateTeam, DeleteTeam, GetAllTeam, GetTeam, UpdateTeam} from "../controllers/teamController";
 
 console.log('Team Route Init');
 
 const teamRoutes = Router()
 
-teamRoutes.post('/createTeam', createTeam)
-teamRoutes.get('/getTeam', getTeam)
-teamRoutes.get('/getAllTeam', getAllTeam)
+teamRoutes.post('/createTeam', CreateTeam)
+teamRoutes.post('/getTeam', GetTeam)
+teamRoutes.get('/getAllTeam', GetAllTeam)
 
+teamRoutes.post('/updateTeam', UpdateTeam)
+teamRoutes.post('/deleteTeam', DeleteTeam)
 
 export default teamRoutes

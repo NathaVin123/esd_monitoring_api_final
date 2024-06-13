@@ -116,69 +116,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
         console.log(error);
         return responseSend(res, 'exception', error);
     } finally {
-        prismaClient.$disconnect();
-    }
-}
-
-export const LoginAdmin = async (req: Request, res: Response) => {
-    try {
-        const { nik, password } = req.body;
-
-        let findUserNIK = await prismaClient.user_master.findFirst({
-            where: { nik }
-        })
-        if(!findUserNIK) {
-            return responseSend(res, 'error', 'NIK not exist');
-        }
-        if(compareSync(password, findUserNIK.password)) {
-            return responseSend(res, 'error', 'Incorrect password');
-        }
-
-        const token: string = sign({
-            userId: findUserNIK.uuid
-        }, JWT_SECRET)
-
-        console.log('Token : ' + token);
-
-    } catch (error) {
-        console.log(error);
-        return responseSend(res, 'exception', error);
-    } finally {
         await prismaClient.$disconnect();
     }
 }
 
-export const RegisterAdmin = async (req: Request, res: Response) => {
-    try {
-        const {nik, email, fullName, password } = req.body;
-
-        let admin = await prismaClient.admin_master.findFirst({where: {email}})
-
-        if(admin) {
-            return responseSend(res, 'error', 'User Already Exist');
-        } else {
-            console.log('User not found');
-        }
-
-        // await prismaClient.$transaction(async (prisma) => {
-            const createAdmin = await prismaClient.admin_master.create({
-                data: {
-                    nik : nik,
-                    email : email,
-                    full_name: fullName,
-                    password: hashSync(password, 10),
-
-                    created_at : now,
-                    created_by : 'admin',
-                    updated_at : null,
-                    updated_by : null,
-                }
-            })
-
-            return responseSend(res,'', createAdmin);
-
-        } catch (error) {
-            console.log('Error creating user:', error)
-            await responseSend(res, 'error', error)
-        }
-}

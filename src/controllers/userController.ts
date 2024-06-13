@@ -102,7 +102,9 @@ export const GetAllUser = async (req: Request, res: Response) => {
 
 export const UpdateUser = async (req: Request, res: Response) => {
     try {
-        const {nik, roleId, teamId, email, fullName, password, gender} = req.body;
+        const {nik, roleId, teamId, email, fullName, gender, activeUser} = req.body;
+
+        console.log('Update User');
 
         let updateUser = await prismaClient.user_master.update({
             where: {
@@ -114,9 +116,8 @@ export const UpdateUser = async (req: Request, res: Response) => {
                 nik : nik,
                 email : email,
                 full_name : fullName,
-                password: hashSync(password, 10),
                 gender : gender,
-                active_user : true,
+                active_user : activeUser,
                 updated_at : now,
                 updated_by : 'admin'
             },

@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "npx nodemon"
+    "start": "npx nodemon",
+    "migrate": "npx prisma migrate dev"
   },
   "keywords": [],
   "author": "",

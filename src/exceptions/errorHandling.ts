@@ -37,8 +37,5 @@ export const responseSend = async (res: any, type: string, message: any, data?: 
         }
     }
 
-
-    let response = res.status(code).json(jsonData);
-
-    return response;
+    return res.status(code).json(jsonData);
 }
