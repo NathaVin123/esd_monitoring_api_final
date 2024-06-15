@@ -7,6 +7,8 @@ import userRoutes from "./userRoute";
 import statusRoutes from "./statusRoute";
 import projectRoutes from "./projectRoute";
 import taskRoutes from "./taskRoute";
+import caseRoute from "./caseRoute";
+import monitoringRoute from "./monitoringRoute";
 
 console.log('Root Route Init');
 
@@ -19,6 +21,9 @@ rootRoutes.use('/user', userRoutes)
 rootRoutes.use('/status', statusRoutes)
 rootRoutes.use('/project', projectRoutes)
 rootRoutes.use('/task', taskRoutes)
+rootRoutes.use('/case', caseRoute)
+rootRoutes.use('/monitoring', monitoringRoute)
+
 
 export default rootRoutes
 

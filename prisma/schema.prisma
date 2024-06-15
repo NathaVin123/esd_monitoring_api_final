@@ -201,18 +201,18 @@ model case_master_hist {
 }
 
 model active_user_monitoring {
-  uuid           String      @id @default(uuid())
-  user           user_master @relation(fields: [user_master_id], references: [uuid])
+  uuid           String       @id @default(uuid())
+  user           user_master  @relation(fields: [user_master_id], references: [uuid])
   user_master_id String
-  task           task_master @relation(fields: [task_master_id], references: [uuid])
-  task_master_id String
-  case           case_master @relation(fields: [case_master_id], references: [uuid])
-  case_master_id String
+  task           task_master? @relation(fields: [task_master_id], references: [uuid])
+  task_master_id String?
+  case           case_master? @relation(fields: [case_master_id], references: [uuid])
+  case_master_id String?
   remark         String?
-  start_time     DateTime    @default(now())
+  start_time     DateTime?
   end_time       DateTime?
   active         Boolean
-  status         String      @default("")
+  duration       Int          @default(0)
 
   created_at DateTime  @default(now())
   created_by String
@@ -230,8 +230,9 @@ model active_user_monitoring_hist {
   start_time                DateTime?
   end_time                  DateTime?
   active                    Boolean?
-  status                    String    @default("")
+  duration                  Int       @default(0)
   action                    String?
+  type                      String?
 
   created_at DateTime  @default(now())
   created_by String

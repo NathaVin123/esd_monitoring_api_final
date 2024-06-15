@@ -1,10 +1,10 @@
 import {Router} from 'express'
-import {getTask} from "../controllers/taskController";
+import {getMoreTask} from "../controllers/taskController";
 
-console.log('Team Route Init');
+console.log('Task Route Init');
 
 const taskRoutes = Router()
 
-taskRoutes.post('/getTask', getTask)
+taskRoutes.post('/getMoreTask', getMoreTask)
 
 export default taskRoutes
