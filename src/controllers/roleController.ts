@@ -144,3 +144,25 @@ export const DeleteRole = async (req: Request, res: Response) => {
         await responseSend(res, 'error', error);
     }
 }
+
+export const CountRole = async ( req: Request, res: Response) => {
+    try {
+        let countRole = await prismaClient.role_master.count({});
+
+        if(countRole === 0) {
+            return res.status(500).json({
+                success: false,
+                message: 'Role empty',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Count status found successfully',
+            data: countRole,
+        });
+    } catch (error) {
+        console.log('Error get role:', error);
+        await responseSend(res, 'error', error);
+    }
+}

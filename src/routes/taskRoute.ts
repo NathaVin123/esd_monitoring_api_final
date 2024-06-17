@@ -1,10 +1,12 @@
 import {Router} from 'express'
-import {getMoreTask} from "../controllers/taskController";
+import {getAllTask, getMoreTask} from "../controllers/taskController";
 
 console.log('Task Route Init');
 
 const taskRoutes = Router()
 
 taskRoutes.post('/getMoreTask', getMoreTask)
+taskRoutes.get('/getAllTask', getAllTask)
+
 
 export default taskRoutes

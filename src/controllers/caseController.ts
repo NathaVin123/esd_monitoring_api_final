@@ -28,3 +28,28 @@ export const getMoreCase = async (req: Request, res: Response) => {
         await responseSend(res, 'error', error);
     }
 }
+
+export const getAllCase = async (req: Request, res: Response) => {
+    const {} = req.body;
+
+    try {
+        let task = await prismaClient.case_master.findMany(
+            {
+                include: {
+                    status: true,
+                }
+            }
+        );
+
+        if(task) {
+            return responseSend(res, 'success', 'Get Case Success', task);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get case');
+        }
+    } catch (error) {
+        console.log('Error get task:', error);
+        await responseSend(res, 'error', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}

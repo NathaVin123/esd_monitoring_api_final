@@ -137,3 +137,25 @@ export const DeleteTeam = async (req: Request, res: Response) => {
         await responseSend(res, 'error', error);
     }
 }
+
+export const CountTeam = async ( req: Request, res: Response) => {
+    try {
+        let countTeam = await prismaClient.team_master.count({});
+
+        if(countTeam === 0) {
+            return res.status(500).json({
+                success: false,
+                message: 'Team empty',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Count status found successfully',
+            data: countTeam,
+        });
+    } catch (error) {
+        console.log('Error get team:', error);
+        await responseSend(res, 'error', error);
+    }
+}

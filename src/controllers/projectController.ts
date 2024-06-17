@@ -10,7 +10,14 @@ export const getAllProject = async (req: Request, res: Response) => {
     const {} = req.body;
 
     try {
-        let project = await prismaClient.project_master.findMany();
+        let project = await prismaClient.project_master.findMany(
+            {
+                include: {
+                    sa_leader: true,
+                    status: true,
+                }
+            }
+        );
 
         if(project) {
             return responseSend(res, 'success', 'Get Project Success', project);
@@ -76,8 +83,8 @@ export const getUserProject = async (req: Request, res: Response) => {
         } else {
             return responseSend(res, 'error', 'Something wrong get project');
         }
-    } catch (Error) {
-
+    } catch (Error : any) {
+        console.log(Error.message)
     } finally {
         await prismaClient.$disconnect()
     }

@@ -148,3 +148,25 @@ export const DeleteUser = async (req: Request, res: Response) => {
         return responseSend(res, 'exception', error);
     }
 }
+
+export const CountUser = async ( req: Request, res: Response) => {
+    try {
+        let countTeam = await prismaClient.user_master.count({});
+
+        if(countTeam === 0) {
+            return res.status(500).json({
+                success: false,
+                message: 'User empty',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Count user found successfully',
+            data: countTeam,
+        });
+    } catch (error) {
+        console.log('Error get user:', error);
+        await responseSend(res, 'error', error);
+    }
+}

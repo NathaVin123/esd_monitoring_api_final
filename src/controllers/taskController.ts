@@ -28,3 +28,28 @@ export const getMoreTask = async (req: Request, res: Response) => {
         await responseSend(res, 'error', error);
     }
 }
+
+export const getAllTask = async (req: Request, res: Response) => {
+    const {} = req.body;
+
+    try {
+        let task = await prismaClient.task_master.findMany(
+            {
+                include: {
+                    status: true,
+                }
+            }
+        );
+
+        if(task) {
+            return responseSend(res, 'success', 'Get Task Success', task);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get task');
+        }
+    } catch (error) {
+        console.log('Error get task:', error);
+        await responseSend(res, 'error', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}

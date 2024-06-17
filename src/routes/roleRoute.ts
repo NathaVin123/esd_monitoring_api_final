@@ -1,17 +1,17 @@
 import {Router} from 'express'
-import {createRole, DeleteRole, getAllRole, getRole, UpdateRole} from "../controllers/roleController";
+import {CountRole, createRole, DeleteRole, getAllRole, getRole, UpdateRole} from "../controllers/roleController";
 
 console.log('Role Route Init');
 
-const teamRoutes = Router()
+const roleRoutes = Router()
 
-teamRoutes.post('/createRole', createRole)
-teamRoutes.post('/getRole', getRole)
-teamRoutes.get('/getAllRole', getAllRole)
+roleRoutes.post('/createRole', createRole)
+roleRoutes.post('/getRole', getRole)
+roleRoutes.get('/getAllRole', getAllRole)
 
-teamRoutes.post('/updateRole', UpdateRole)
-teamRoutes.post('/deleteRole', DeleteRole)
+roleRoutes.post('/updateRole', UpdateRole)
+roleRoutes.post('/deleteRole', DeleteRole)
 
+roleRoutes.get('/countRole', CountRole)
 
-
-export default teamRoutes
+export default roleRoutes

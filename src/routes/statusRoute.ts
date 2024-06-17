@@ -1,7 +1,14 @@
 import {Router} from 'express'
-import {CreateStatus, DeleteStatus, GetAllStatus, GetStatus, UpdateStatus} from "../controllers/statusController";
+import {
+    CountStatus,
+    CreateStatus,
+    DeleteStatus,
+    GetAllStatus,
+    GetStatus,
+    UpdateStatus
+} from "../controllers/statusController";
 
-console.log('Team Route Init');
+console.log('Status Route Init');
 
 const statusRoutes = Router()
 
@@ -11,5 +18,7 @@ statusRoutes.get('/getAllStatus', GetAllStatus)
 
 statusRoutes.post('/updateStatus', UpdateStatus)
 statusRoutes.post('/deleteStatus', DeleteStatus)
+
+statusRoutes.get('/countStatus', CountStatus)
 
 export default statusRoutes

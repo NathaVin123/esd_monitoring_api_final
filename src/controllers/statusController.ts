@@ -110,16 +110,6 @@ export const DeleteStatus = async (req: Request, res: Response) => {
     const {uuid} = req.body;
 
     try {
-        // let findUserTeam = await prismaClient.user_master.findFirst({
-        //     where: {
-        //         status_master_id : uuid,
-        //     }
-        // });
-        //
-        // if(findUserTeam) {
-        //     return responseSend(res, 'error', 'Cannot delete team, user in team exist');
-        // }
-
         let deleteTeam = await prismaClient.status_master.delete(
             {
                 where: {
@@ -136,6 +126,29 @@ export const DeleteStatus = async (req: Request, res: Response) => {
 
     } catch (error) {
         console.log('Error get team:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const CountStatus = async (req: Request, res: Response) => {
+    try {
+        let countStatus = await prismaClient.status_master.count({})
+
+        if(countStatus === 0) {
+            return res.status(500).json({
+                success: false,
+                message: 'Status empty',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Count status found successfully',
+            data: countStatus,
+        });
+
+    } catch (error) {
+        console.log('Error get status : ', error);
         await responseSend(res, 'error', error);
     }
 }
