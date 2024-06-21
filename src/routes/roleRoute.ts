@@ -1,5 +1,13 @@
 import {Router} from 'express'
-import {CountRole, createRole, DeleteRole, getAllRole, getRole, UpdateRole} from "../controllers/roleController";
+import {
+    CountRole,
+    createRole,
+    DeleteRole,
+    getAllRole,
+    getRole,
+    getRoleWithName,
+    UpdateRole
+} from "../controllers/roleController";
 
 console.log('Role Route Init');
 
@@ -13,5 +21,6 @@ roleRoutes.post('/updateRole', UpdateRole)
 roleRoutes.post('/deleteRole', DeleteRole)
 
 roleRoutes.get('/countRole', CountRole)
+roleRoutes.post('/getRoleWithName', getRoleWithName);
 
 export default roleRoutes

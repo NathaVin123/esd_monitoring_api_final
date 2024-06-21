@@ -1,5 +1,14 @@
 import {Router} from 'express'
-import {getAllProject, getProject, getUserProject} from "../controllers/projectController";
+import {
+    createProject,
+    deleteProject,
+    getAllProject,
+    getAllProjectFromTeamIn,
+    getAllProjectUserId,
+    getProject,
+    getUserProject,
+    updateProjectNew
+} from "../controllers/projectController";
 
 const projectRoutes = Router()
 
@@ -7,8 +16,20 @@ console.log('Project Route Init');
 
 // CRUD Project
 projectRoutes.get('/getAllProject', getAllProject)
+
 projectRoutes.post('/getProject', getProject)
+
 projectRoutes.post('/getUserProject', getUserProject)
+
+projectRoutes.post('/createProject', createProject)
+
+projectRoutes.post('/getAllProjectUserId', getAllProjectUserId)
+
+projectRoutes.post('/updateProjectNew', updateProjectNew);
+
+projectRoutes.post('/deleteProject', deleteProject);
+
+projectRoutes.post('/getAllProjectFromTeamIn', getAllProjectFromTeamIn);
 
 // projectRoutes.post('/createProject', createProject)
 // projectRoutes.post('/updateProject', updateProject)

@@ -36,9 +36,6 @@ export const CreateUser = async (req: Request, res: Response)=> {
                 password: hashSync(password, 10),
                 gender : gender,
                 active_user : activeUser,
-                darkmode_enabled : true,
-                notification_enabled : true,
-                session : null,
                 created_at : now,
                 created_by : createdBy,
                 updated_at : null,
@@ -55,19 +52,141 @@ export const CreateUser = async (req: Request, res: Response)=> {
     }
 }
 
-export const GetUserWithRole = async (req: Request, res: Response) => {
+export const GetFirstUser = async (req: Request, res: Response) => {
     try {
         const {nik} = req.body;
 
-        let findUser = await prismaClient.user_master.findUnique({
+        let findUser = await prismaClient.user_master.findFirst({
             where: {
-                nik: nik,
+                nik: nik
             },
-            include: {
-                role: true,
-                team: true,
+            select: {
+                uuid: true,
+                role_master_id: true,
+                team_master_id: true,
+                nik: true,
+                email: true,
+                full_name: true,
+                gender: true,
+                active_user: true,
             }
         })
+
+        if(!findUser) {
+            return responseSend(res, 'error', 'User not found');
+        } else {
+            return responseSend(res, 'success', 'Get User Success', findUser);
+        }
+
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'exception', error);
+    }
+}
+
+export const GetFirstUserUUID = async (req: Request, res: Response) => {
+    try {
+        const {uuid} = req.body;
+
+        let findUser = await prismaClient.user_master.findFirst({
+            where: {
+                uuid: uuid,
+            },
+            select: {
+                uuid: true,
+                role_master_id: true,
+                team_master_id: true,
+                nik: true,
+                email: true,
+                full_name: true,
+                gender: true,
+                active_user: true,
+            }
+        })
+
+        if(!findUser) {
+            return responseSend(res, 'error', 'User not found');
+        } else {
+            return responseSend(res, 'success', 'Get User Success', findUser);
+        }
+
+    } catch (error) {
+        console.log(error);
+        return responseSend(res, 'exception', error);
+    }
+}
+
+export const GetUserWithRole = async (req: Request, res: Response) => {
+    try {
+        const {nik, type} = req.body;
+
+        let findUser = null;
+
+        if(type === 'profile') {
+            findUser = await prismaClient.user_master.findUnique({
+                where: {
+                    nik: nik,
+                },
+                include: {
+                    role: true,
+                    team: true,
+                }
+            })
+        } else {
+            findUser = await prismaClient.user_master.findUnique({
+                where: {
+                    nik: nik,
+                },
+                select: {
+                    uuid: true,
+                    role_master_id: true,
+                    team_master_id: true,
+                    nik: true,
+                    email: true,
+                    full_name: true,
+                    password: true,
+                    gender: true,
+                    profile_photo: false,
+                    active_user: true,
+                    created_at: true,
+                    created_by: true,
+                    updated_at: true,
+                    updated_by: true,
+
+                    role: true,
+                    team: true,
+                },
+            })
+        }
+
+        // let findUser = await prismaClient.user_master.findUnique({
+        //     where: {
+        //         nik: nik,
+        //     },
+        //     select: {
+        //         uuid: true,
+        //         role_master_id: true,
+        //         team_master_id: true,
+        //         nik: true,
+        //         email: true,
+        //         full_name: true,
+        //         password: true,
+        //         gender: true,
+        //         profile_photo: false,
+        //         active_user: true,
+        //         created_at: true,
+        //         created_by: true,
+        //         updated_at: true,
+        //         updated_by: true,
+        //
+        //         role: true,
+        //         team: true,
+        //     },
+        //     // include: {
+        //     //     role: true,
+        //     //     team: true,
+        //     // }
+        // })
 
         console.log(findUser);
 
@@ -102,7 +221,7 @@ export const GetAllUser = async (req: Request, res: Response) => {
 
 export const UpdateUser = async (req: Request, res: Response) => {
     try {
-        const {nik, roleId, teamId, email, fullName, gender, activeUser} = req.body;
+        const {nik, roleId, teamId, email, fullName, gender, activeUser, updatedBy} = req.body;
 
         console.log('Update User');
 
@@ -119,7 +238,7 @@ export const UpdateUser = async (req: Request, res: Response) => {
                 gender : gender,
                 active_user : activeUser,
                 updated_at : now,
-                updated_by : 'admin'
+                updated_by : updatedBy,
             },
         });
 
@@ -168,5 +287,61 @@ export const CountUser = async ( req: Request, res: Response) => {
     } catch (error) {
         console.log('Error get user:', error);
         await responseSend(res, 'error', error);
+    }
+}
+
+export const getUserSAOnly = async (req: Request, res: Response) => {
+    try {
+        // const {} = req.body;
+        const roleId = '454b02b0-4218-4713-ba6b-5fe5713072dc';
+        let user = await prismaClient.user_master.findMany({
+            where: {
+                role_master_id: roleId,
+            }
+        })
+
+        if(!user) {
+            return responseSend(res, 'error', 'User not found');
+        }
+
+        return responseSend(res, 'success', 'Get User Success', user);
+
+    } catch (error) {
+        console.log('Error get user:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
+export const getAllUserTeam = async (req: Request, res: Response) => {
+    try {
+        console.log('Init Get User Team Init');
+        const {teamId} = req.body;
+
+        let userTeam = await prismaClient.user_master.findMany({
+            where: {
+                team_master_id: teamId,
+            },
+            select : {
+                uuid: true,
+                role_master_id : true,
+                team_master_id: true,
+                nik: true,
+                email: true,
+                full_name: true,
+                gender: true,
+                active_user: true,
+            }
+        });
+
+        if(userTeam) {
+            return responseSend(res, 'success', 'Get User Success', userTeam);
+        } else {
+            return responseSend(res, 'error', 'Somenthing wrong, userTeam');
+        }
+    } catch (error) {
+        console.log('Error get user:', error);
+        await responseSend(res, 'error', error);
+    } finally {
+        await prismaClient.$disconnect();
     }
 }

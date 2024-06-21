@@ -61,6 +61,29 @@ export const getRole = async (req: Request, res: Response) => {
     }
 }
 
+export const getRoleWithName = async (req: Request, res: Response) => {
+    const {name} = req.body;
+
+    try {
+        let role = await prismaClient.role_master.findFirst(
+            {
+                where: {
+                    role_name: name,
+                }
+            }
+        );
+
+        if(role) {
+            return responseSend(res, 'success', 'Get Role Success', role);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get role');
+        }
+    } catch (error) {
+        console.log('Error get role:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
 export const getAllRole = async (req: Request, res: Response) => {
     // const {} = req.body;
 

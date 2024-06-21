@@ -74,6 +74,29 @@ export const GetAllTeam = async (req: Request, res: Response) => {
     }
 }
 
+export const getTeamWithName = async (req: Request, res: Response) => {
+    const {name} = req.body;
+
+    try {
+        let team = await prismaClient.team_master.findFirst(
+            {
+                where: {
+                    team_name: name,
+                }
+            }
+        );
+
+        if(team) {
+            return responseSend(res, 'success', 'Get Role Success', team);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get role');
+        }
+    } catch (error) {
+        console.log('Error get role:', error);
+        await responseSend(res, 'error', error);
+    }
+}
+
 export const UpdateTeam = async (req: Request, res: Response) => {
     const {uuid, teamName, teamDescription} = req.body;
 

@@ -4,6 +4,10 @@ import {
     CreateUser,
     DeleteUser,
     GetAllUser,
+    getAllUserTeam,
+    GetFirstUser,
+    GetFirstUserUUID,
+    getUserSAOnly,
     GetUserWithRole,
     UpdateUser
 } from "../controllers/userController";
@@ -20,5 +24,13 @@ userRoutes.get('/getAllUser', GetAllUser)
 
 userRoutes.get('/countUser', CountUser)
 
+userRoutes.get('/getUserSAOnly', getUserSAOnly)
+
+userRoutes.post('/getFirstUser', GetFirstUser)
+
+userRoutes.post('/getFirstUserUUID', GetFirstUserUUID);
+
+userRoutes.post('/getAllUserTeam', getAllUserTeam)
 
 export default userRoutes;
+ 

@@ -32,6 +32,60 @@ export const getAllProject = async (req: Request, res: Response) => {
     }
 }
 
+export const getAllProjectFromTeamIn = async (req: Request, res: Response) => {
+    const {teamId} = req.body;
+
+    try {
+        const findProject = await prismaClient.project_master.findMany({
+            where: {
+                team_master_id: teamId,
+            }
+        });
+
+        if(findProject) {
+            return responseSend(res, 'success', 'Get Project Success', findProject);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get project');
+        }
+    } catch (error) {
+        console.log('Error get project:', error);
+        await responseSend(res, 'error', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}
+
+export const getAllProjectUserId = async (req: Request, res: Response) => {
+    const {saLeaderId} = req.body;
+
+    console.log('Sa Leader Id : ',saLeaderId);
+
+    try {
+        let project = await prismaClient.project_master.findMany(
+            {
+                where: {
+                    sa_leader_id: saLeaderId,
+                },
+                include: {
+                    sa_leader: true,
+                    status: true,
+                }
+            }
+        );
+
+        if(project) {
+            return responseSend(res, 'success', 'Get Project Success', project);
+        } else {
+            return responseSend(res, 'error', 'Something wrong get project');
+        }
+    } catch (error) {
+        console.log('Error get project:', error);
+        await responseSend(res, 'error', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}
+
 export const getProject = async (req: Request, res: Response) => {
     try {
         const { uuid } = req.body;
@@ -64,7 +118,9 @@ export const getUserProject = async (req: Request, res: Response) => {
             include: {
                 project: {
                     include: {
-                        sa_leader: true,
+                        team: true,
+                        status: true,
+                        // sa_leader: true,
                         task_master: true,
                         case_master: true,
                     }
@@ -92,7 +148,7 @@ export const getUserProject = async (req: Request, res: Response) => {
 
 export const createProject = async (req: Request, res: Response) => {
     try {
-        const { projectName, projectDescription, projectTcode, userId } = req.body;
+        const {projectTcode, projectName, projectDescription, statusId, saLeaderId, startDate, endDate, userId, teamId } = req.body;
 
         let project = await prismaClient.project_master.findFirst({where: {project_name: projectName}})
 
@@ -108,9 +164,11 @@ export const createProject = async (req: Request, res: Response) => {
                 project_tcode : projectTcode,
                 project_name : projectName,
                 project_description: projectDescription,
-                sa_leader_id: null,
-                start_date: now,
-                end_date: null,
+                status_master_id: statusId,
+                sa_leader_id: saLeaderId,
+                start_date: startDate,
+                end_date: endDate,
+                team_master_id: teamId,
                 created_at : now,
                 created_by : userId,
                 updated_at : null,
@@ -129,40 +187,101 @@ export const createProject = async (req: Request, res: Response) => {
     }
 }
 
-export const updateProject = async (req: Request, res: Response)=> {
+// export const updateProject = async (req: Request, res: Response)=> {
+//
+//     try {
+//         const { projectName, projectDescription, projectTcode, saleaderId, startDate, endDate, userId } = req.body;
+//
+//         const updateProject = await prismaClient.project_master.update({
+//             where: {
+//                 project_name: projectName
+//             },
+//             data: {
+//                 project_name: projectName,
+//                 project_description: projectDescription,
+//                 project_tcode: projectTcode,
+//                 sa_leader_id: saleaderId,
+//                 start_date: startDate,
+//                 end_date: endDate,
+//
+//                 updated_at: now,
+//                 updated_by: userId,
+//             }
+//         })
+//
+//         if(!updateProject) {
+//             return responseSend(res, 'error', 'Project didnt exist');
+//         } else {
+//             return responseSend(res, 'success', 'Project succesfully updated');
+//         }
+//     } catch(error) {
+//         console.log('Error delete project:', error)
+//         return responseSend(res, 'error', error)
+//     } finally {
+//         await prismaClient.$disconnect();
+//     }
+// }
 
+export const updateProjectNew = async (req: Request, res: Response) => {
     try {
-        const { projectName, projectDescription, projectTcode, saleaderId, startDate, endDate, userId } = req.body;
+        const { uuid, projectName, projectDescription, projectTcode, statusId, startDate, endDate, userId} = req.body;
+
+        console.log(req.body);
 
         const updateProject = await prismaClient.project_master.update({
             where: {
-                project_name: projectName
+                uuid: uuid,
             },
             data: {
-                project_name: projectName,
-                project_description: projectDescription,
-                project_tcode: projectTcode,
-                sa_leader_id: saleaderId,
-                start_date: startDate,
-                end_date: endDate,
-
+                project_name : projectName,
+                project_tcode : projectTcode,
+                project_description : projectDescription,
+                start_date : startDate,
+                end_date : endDate,
+                status_master_id: statusId,
+                updated_by : userId,
                 updated_at: now,
-                updated_by: userId,
             }
-        })
+        });
 
-        if(!updateProject) {
-            return responseSend(res, 'error', 'Project didnt exist');
+        if(updateProject) {
+            return responseSend(res, 'success', 'Project succesfully updated');
         } else {
             return responseSend(res, 'error', 'Project succesfully updated');
         }
-    } catch(error) {
+    } catch (error) {
+        console.log('Error delete project:', error)
+        return responseSend(res, 'error', error)
+    } finally {
+        await prismaClient.$disconnect();
+
+    }
+}
+
+export const deleteProject = async (req: Request, res: Response) => {
+    try {
+        const {uuid} = req.body;
+
+        console.log(uuid);
+
+        let deleteProject = await prismaClient.project_master.delete({
+            where: {
+                uuid: uuid,
+            },
+        });
+
+        if(deleteProject) {
+            return responseSend(res, 'success', 'Project successfully deleted');
+        } else {
+            return responseSend(res, 'error', 'Something wrong deleted project');
+        }
+
+    } catch (error) {
         console.log('Error delete project:', error)
         return responseSend(res, 'error', error)
     } finally {
         await prismaClient.$disconnect();
     }
-
 }
 
 // export const deleteProject = async (req: Request, res: Response) => {

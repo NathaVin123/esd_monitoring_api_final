@@ -5,8 +5,13 @@ import {compareSync, hashSync} from 'bcrypt';
 import {now} from "../utils/date";
 import jwt, {sign} from 'jsonwebtoken';
 import {JWT_SECRET} from "../env";
+import multer from "multer";
+import sharp from "sharp";
 
 console.log('Auth Controller Init');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage }).single('profilePhoto');
 
 export const GetToken = async (req: Request, res: Response) => {
     try {
@@ -45,7 +50,24 @@ export const LoginUser = async (req: Request, res: Response) => {
         const { nik, password } = req.body;
 
         let findUserNIK = await prismaClient.user_master.findFirst({
-            where: { nik }
+            where: { nik },
+            select: {
+                uuid: true,
+                role_master_id: true,
+                team_master_id: true,
+                nik: true,
+                email: true,
+                full_name: true,
+                password: true,
+                gender: true,
+                profile_photo: false,
+                active_user: true,
+
+                created_at: true,
+                created_by: true,
+                updated_at: true,
+                updated_by: true,
+            }
         })
         if(!findUserNIK)
         {
@@ -62,15 +84,6 @@ export const LoginUser = async (req: Request, res: Response) => {
             userId: findUserNIK.uuid
         }, JWT_SECRET, { expiresIn: '2h' })
 
-        // setCookie({ res }, 'token', token, {
-        //     httpOnly: true, // more secure, can't be accessed by JavaScript
-        //     // secure: process.env.NODE_ENV === 'production', // use HTTPS in production
-        //     maxAge: 30 * 24 * 60 * 60, // 30 days
-        //     path: '/',
-        // });
-        //
-        // console.log(token);
-
         return responseSend(res, 'success', 'Login Succesfully', {
             nik: findUserNIK.nik,
             token: token
@@ -85,38 +98,67 @@ export const LoginUser = async (req: Request, res: Response) => {
 }
 
 export const RegisterUser = async (req: Request, res: Response) => {
-    try {
-        const { roleId, teamId, nik, email, full_name, gender, password, activeUser } = req.body;
 
-        let alreadyRegister = await prismaClient.user_master.findFirst({where: {email}})
+    console.log('Register User Init');
 
-        if(alreadyRegister) {
-            throw Error('User Already Exist')
+    upload(req, res, async (err: any) => {
+        if(err) {
+            return responseSend(res, 'error', 'Error uploading file');
         }
+        try {
+            console.log(req.file?.buffer);
+            const { roleId, teamId, nik, email, fullName, gender, password, activeUser, createdBy } = req.body;
 
-        // await prismaClient.$transaction(async (prisma) => {
-        const createUser = await prismaClient.user_master.create({
-            data: {
-                role_master_id: roleId,
-                team_master_id : teamId,
-                nik : nik,
-                email : email,
-                full_name : full_name,
-                password: hashSync(password, 30),
-                gender : gender,
-                active_user : activeUser,
-                session : null,
-                created_at : now,
-                created_by : 'admin',
+            // const profilePhoto = req.file ? req.file.buffer : null;
+
+            let profilePhoto: Buffer | null = null;
+            if (req.file) {
+                profilePhoto = await sharp(req.file.buffer)
+                    .resize(200, 200) // Resize to 200x200 pixels
+                    .jpeg({ quality: 50 }) // Compress to 80% quality
+                    .toBuffer();
             }
-        })
-        console.log(createUser)
-        res.json(createUser)
-    } catch (error) {
-        console.log(error);
-        return responseSend(res, 'exception', error);
-    } finally {
-        await prismaClient.$disconnect();
-    }
+
+            let alreadyRegister = await prismaClient.user_master.findFirst({where: {email}})
+
+            console.log(alreadyRegister);
+
+            if(alreadyRegister) {
+                return responseSend(res, 'error', 'User Already Exist!');
+            }
+
+            console.log('Init Create User');
+
+            console.log(req.body);
+
+            const createUser = await prismaClient.user_master.create({
+                data: {
+                    role_master_id: roleId,
+                    team_master_id : teamId,
+                    nik : nik,
+                    email : email,
+                    full_name : fullName,
+                    password: hashSync(password, 10),
+                    gender : gender,
+                    active_user : activeUser === 'true',
+                    profile_photo: profilePhoto,
+                    created_at : now,
+                    created_by : createdBy,
+                    updated_at : null,
+                    updated_by : null
+                }
+            })
+            console.log(createUser)
+
+            return responseSend(res, 'success', 'Create user successfully');
+
+        } catch (error) {
+            console.log(error);
+            return responseSend(res, 'exception', error);
+        } finally {
+            await prismaClient.$disconnect();
+        }
+    });
 }
+
 

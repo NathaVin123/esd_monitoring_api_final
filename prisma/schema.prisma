@@ -14,21 +14,21 @@ datasource db {
 }
 
 model user_master {
-  uuid                 String      @id @default(uuid())
-  role                 role_master @relation(fields: [role_master_id], references: [uuid])
-  role_master_id       String
-  team                 team_master @relation(fields: [team_master_id], references: [uuid])
-  team_master_id       String
-  nik                  String      @unique
-  email                String      @unique
-  full_name            String
-  password             String
-  gender               String
-  profile_photo        Bytes?
-  active_user          Boolean     @default(true)
-  session              String?
-  darkmode_enabled     Boolean     @default(false)
-  notification_enabled Boolean     @default(false)
+  uuid           String      @id @default(uuid())
+  role           role_master @relation(fields: [role_master_id], references: [uuid])
+  role_master_id String
+  team           team_master @relation(fields: [team_master_id], references: [uuid])
+  team_master_id String
+  nik            String      @unique
+  email          String      @unique
+  full_name      String
+  password       String
+  gender         String
+  profile_photo  Bytes?
+  active_user    Boolean     @default(true)
+  // session        String?
+  // darkmode_enabled Boolean     @default(false)
+  // notification_enabled Boolean     @default(false)
 
   created_at DateTime  @default(now())
   created_by String
@@ -38,7 +38,10 @@ model user_master {
   active_user_monitoring active_user_monitoring[]
   project_master         project_master[]
   user_project           user_project[]
+  task_master            task_master[]
+  case_master            case_master[]
 
+  // user_project           user_project[]
   @@index([nik, email, password])
 }
 
@@ -52,7 +55,9 @@ model team_master {
   updated_at DateTime?
   updated_by String?
 
-  user_master user_master[]
+  user_master            user_master[]
+  project_master         project_master[]
+  active_user_monitoring active_user_monitoring[]
 
   @@index([team_name])
 }
@@ -96,21 +101,27 @@ model project_master {
   project_description String?
   sa_leader           user_master?   @relation(fields: [sa_leader_id], references: [uuid])
   sa_leader_id        String?
+  tdp_document        Bytes?
   start_date          DateTime
   end_date            DateTime?
   status              status_master? @relation(fields: [status_master_id], references: [uuid])
   status_master_id    String?
+  team                team_master    @relation(fields: [team_master_id], references: [uuid])
+  team_master_id      String
 
   created_at DateTime  @default(now())
   created_by String
   updated_at DateTime?
   updated_by String?
 
-  user_project user_project[]
+  // user_project user_project[]
 
-  task_master task_master[]
-  case_master case_master[]
+  task_master            task_master[]
+  case_master            case_master[]
+  user_project           user_project[]
+  active_user_monitoring active_user_monitoring[]
 
+  // active_user_monitoring active_user_monitoring[]
   @@index([project_tcode, project_name])
 }
 
@@ -131,13 +142,15 @@ model task_master {
   uuid              String         @id @default(uuid())
   task_name         String
   task_description  String?
-  project           project_master @relation(fields: [project_master_id], references: [uuid])
+  project           project_master @relation(fields: [project_master_id], references: [uuid], onDelete: Cascade)
   project_master_id String
   status            status_master  @relation(fields: [status_master_id], references: [uuid])
   status_master_id  String
   start_date        DateTime       @default(now())
   end_date          DateTime?
   progress          Int            @default(0)
+  assigned_by       user_master?   @relation(fields: [user_master_id], references: [uuid])
+  user_master_id    String?
 
   created_at DateTime  @default(now())
   created_by String
@@ -166,13 +179,15 @@ model case_master {
   uuid              String         @id @default(uuid())
   case_name         String
   case_description  String?
-  project           project_master @relation(fields: [project_master_id], references: [uuid])
+  project           project_master @relation(fields: [project_master_id], references: [uuid], onDelete: Cascade)
   project_master_id String
   status            status_master  @relation(fields: [status_master_id], references: [uuid])
   status_master_id  String
   start_date        DateTime       @default(now())
   end_date          DateTime?
   progress          Int            @default(0)
+  assigned_by       user_master?   @relation(fields: [user_master_id], references: [uuid])
+  user_master_id    String?
 
   created_at DateTime  @default(now())
   created_by String
@@ -201,18 +216,22 @@ model case_master_hist {
 }
 
 model active_user_monitoring {
-  uuid           String       @id @default(uuid())
-  user           user_master  @relation(fields: [user_master_id], references: [uuid])
-  user_master_id String
-  task           task_master? @relation(fields: [task_master_id], references: [uuid])
-  task_master_id String?
-  case           case_master? @relation(fields: [case_master_id], references: [uuid])
-  case_master_id String?
-  remark         String?
-  start_time     DateTime?
-  end_time       DateTime?
-  active         Boolean
-  duration       Int          @default(0)
+  uuid              String          @id @default(uuid())
+  user              user_master     @relation(fields: [user_master_id], references: [uuid])
+  user_master_id    String
+  task              task_master?    @relation(fields: [task_master_id], references: [uuid])
+  task_master_id    String?
+  case              case_master?    @relation(fields: [case_master_id], references: [uuid])
+  case_master_id    String?
+  team              team_master?    @relation(fields: [team_master_id], references: [uuid])
+  team_master_id    String?
+  project           project_master? @relation(fields: [project_master_id], references: [uuid])
+  project_master_id String?
+  remark            String?
+  start_time        DateTime?
+  end_time          DateTime?
+  active            Boolean
+  duration          Int             @default(0)
 
   created_at DateTime  @default(now())
   created_by String
@@ -226,6 +245,8 @@ model active_user_monitoring_hist {
   user_master_id            String?
   task_master_id            String?
   case_master_id            String?
+  team_master_id            String?
+  project_master_id         String?
   remark                    String?
   start_time                DateTime?
   end_time                  DateTime?
