@@ -1,11 +1,15 @@
 import {Router} from 'express'
 import {
     createActivity,
+    findExistActivityAssign,
     GetAllMonitoring,
     GetAllMonitoringTeam,
     getMonitoring,
+    getMonitoringHistTeam,
+    getMonitoringHistUser,
     getMonitoringWithTeam,
     monitoringDone,
+    sumDurationTaskUserId,
     updateActiveMonitoringEnd,
     updateActiveMonitoringStart,
     updateActivityCaseSA,
@@ -31,5 +35,13 @@ MonitoringRoute.post('/updateActivityTaskSA', updateActivityTaskSA);
 MonitoringRoute.post('/updateActivityCaseSA', updateActivityCaseSA);
 
 MonitoringRoute.post('monitoringDone', monitoringDone);
+
+MonitoringRoute.post('/getMonitoringHistTeam', getMonitoringHistTeam);
+
+MonitoringRoute.post('/findExistActivityAssign', findExistActivityAssign);
+
+MonitoringRoute.post('/sumDurationTaskUserId', sumDurationTaskUserId);
+
+MonitoringRoute.post('/getMonitoringHistUser', getMonitoringHistUser);
 
 export default MonitoringRoute

@@ -61,27 +61,57 @@ export const updateActiveMonitoringStart = async (req: Request, res: Response) =
             }
         })
 
-        await prismaClient.active_user_monitoring_hist.create({
+        console.log('findUpdateActiveMonitoring : ', findUpdateActiveMonitoring);
+
+        const findFirstUser = await prismaClient.user_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring.user_master_id,
+            },
+        });
+
+        const findFirstTask = await prismaClient.task_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring?.task_master_id ?? undefined,
+            },
+        });
+
+        console.log('Case test : ',findUpdateActiveMonitoring?.case_master_id);
+
+        const findFirstCase = await prismaClient.case_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring?.case_master_id ?? undefined,
+            },
+        });
+
+        const dataTrial = {
+            task_master_id: findUpdateActiveMonitoring.task_master_id !== null ? findFirstTask?.task_name : null,
+            case_master_id: findUpdateActiveMonitoring.case_master_id !== null ? findFirstCase?.case_name : null,
+        };
+
+        console.log('Data Trial : ',dataTrial);
+
+        let createHistAUM = prismaClient.active_user_monitoring_hist.create({
             data: {
                 active_user_monitoring_id: findUpdateActiveMonitoring.uuid,
-                user_master_id: findUpdateActiveMonitoring.user_master_id,
-                task_master_id: findUpdateActiveMonitoring.task_master_id,
-                case_master_id: findUpdateActiveMonitoring.case_master_id,
-                team_master_id: findActiveMonitoring.team_master_id,
+                user_master_id: findFirstUser?.full_name,
+                task_master_id: findUpdateActiveMonitoring.task_master_id !== null ? findFirstTask?.task_name : null,
+                case_master_id: findUpdateActiveMonitoring.case_master_id !== null ? findFirstCase?.case_name : null,
+                team_master_id: findUpdateActiveMonitoring?.team_master_id,
                 remark: findUpdateActiveMonitoring.remark,
                 start_time: findUpdateActiveMonitoring.start_time,
                 end_time: findUpdateActiveMonitoring.end_time,
-                active: findActiveMonitoring.active,
-                duration: findActiveMonitoring.duration,
+                active: findUpdateActiveMonitoring.active,
+                // duration: findActiveMonitoring.duration,
                 action: 'UPDATE',
                 type: 'START',
-
                 created_by : 'admin',
                 created_at: now,
                 updated_at: null,
                 updated_by: null,
             }
         })
+
+        console.log('Update active_user_monitoring_hist : ', createHistAUM);
 
         if(findUpdateActiveMonitoring) {
             return responseSend(res, 'success', 'Update monitoring success');
@@ -131,18 +161,42 @@ export const updateActiveMonitoringEnd = async (req: Request, res: Response) => 
             }
         })
 
+        const findUser = await prismaClient.user_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring?.user_master_id,
+            }
+        });
+
+        const findFirstTask = await prismaClient.task_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring?.task_master_id ?? undefined,
+            },
+        });
+
+        const findFirstCase = await prismaClient.case_master.findFirst({
+            where: {
+                uuid: findUpdateActiveMonitoring?.case_master_id ?? undefined,
+            },
+        });
+
+        // const findFirstTeam = await prismaClient.team_master.findFirst({
+        //     where: {
+        //         uuid: findActiveMonitoring?.team_master_id ?? undefined,
+        //     }
+        // });
+
         await prismaClient.active_user_monitoring_hist.create({
             data: {
                 active_user_monitoring_id: findUpdateActiveMonitoring.uuid,
-                user_master_id: findUpdateActiveMonitoring.user_master_id,
-                task_master_id: findUpdateActiveMonitoring.task_master_id,
-                case_master_id: findUpdateActiveMonitoring.case_master_id,
-                team_master_id: findActiveMonitoring.team_master_id,
+                user_master_id: findUser?.full_name,
+                task_master_id: findUpdateActiveMonitoring?.task_master_id !== null ? findFirstTask?.task_name : null,
+                case_master_id:  findUpdateActiveMonitoring?.case_master_id !== null ? findFirstCase?.case_name : null,
+                team_master_id: findActiveMonitoring?.team_master_id,
                 remark: findUpdateActiveMonitoring.remark,
                 start_time: findUpdateActiveMonitoring.start_time,
                 end_time: findUpdateActiveMonitoring.end_time,
-                active: findActiveMonitoring.active,
-                duration: findActiveMonitoring.duration,
+                active: findUpdateActiveMonitoring.active,
+                duration: findUpdateActiveMonitoring.duration,
                 action: 'UPDATE',
                 type: 'END',
                 created_by : 'admin',
@@ -162,6 +216,7 @@ export const updateActiveMonitoringEnd = async (req: Request, res: Response) => 
         await responseSend(res, 'error', error);
     }
 }
+
 
 export const GetAllMonitoring = async (req: Request, res: Response) => {
     try {
@@ -299,13 +354,14 @@ export const createActivity = async (req: Request, res: Response) => {
         console.error('Error create Active Monitoring:', error);
     } finally {
         await prismaClient.$disconnect();
-
     }
 }
 
 export const updateActivityTaskSA = async (req: Request, res: Response) => {
     try {
-        const {uuidTask, teamId, assignedBy, projectId} = req.body;
+        const {uuidTask, teamId, assignedBy, projectId, remark} = req.body;
+
+        console.log('Remark : ',remark);
 
         let updateTask = await prismaClient.task_master.update({
             where: {
@@ -324,23 +380,49 @@ export const updateActivityTaskSA = async (req: Request, res: Response) => {
             },
         });
 
-
         if (updateTask) {
-            let createActivity = await prismaClient.active_user_monitoring.create({
-                data: {
-                    user_master_id: assignedBy,
+            let findAssign = await prismaClient.active_user_monitoring.findFirst({
+                where : {
                     task_master_id: findTaskFirst?.uuid ?? null,
                     team_master_id: teamId,
                     project_master_id: projectId,
-                    active: false,
-                    created_by: 'admin',
                 }
             });
 
-            if(createActivity) {
-                return responseSend(res, 'success', 'Get monitoring team success', createActivity);
+            if(!findAssign) {
+                let createActivity = await prismaClient.active_user_monitoring.create({
+                    data: {
+                        user_master_id: assignedBy,
+                        task_master_id: findTaskFirst?.uuid ?? null,
+                        team_master_id: teamId,
+                        project_master_id: projectId,
+                        remark: remark,
+                        active: false,
+                        created_by: 'admin',
+                    }
+                });
+
+                if(createActivity) {
+                    return responseSend(res, 'success', 'Get monitoring assigned success', createActivity);
+                } else {
+                    return responseSend(res, 'error', 'Something wrong');
+                }
             } else {
-                return responseSend(res, 'error', 'Something wrong');
+                let updateActivity = await prismaClient.active_user_monitoring.update({
+                    where: {
+                        uuid: findAssign.uuid,
+                    },
+                    data: {
+                        user_master_id: assignedBy,
+                        remark: remark,
+                    }
+                });
+
+                if(updateActivity) {
+                    return responseSend(res, 'success', 'Get monitoring update assigned success', createActivity);
+                } else {
+                    return responseSend(res, 'error', 'Something wrong');
+                }
             }
         }
 
@@ -348,13 +430,14 @@ export const updateActivityTaskSA = async (req: Request, res: Response) => {
         console.error('Error update activity :', error);
     } finally {
         await prismaClient.$disconnect();
-
     }
 }
 
 export const updateActivityCaseSA = async (req: Request, res: Response) => {
     try {
-        const {uuidCase, teamId, assignedBy, projectId} = req.body;
+        const {uuidCase, teamId, assignedBy, projectId, remark} = req.body;
+
+        console.log('Remark : ',remark);
 
         let updateTask = await prismaClient.case_master.update({
             where: {
@@ -373,24 +456,52 @@ export const updateActivityCaseSA = async (req: Request, res: Response) => {
             },
         });
 
-
         if (updateTask) {
-            let createActivity = await prismaClient.active_user_monitoring.create({
-                data: {
-                    user_master_id: assignedBy,
+            let findAssign = await prismaClient.active_user_monitoring.findFirst({
+                where : {
                     case_master_id: findCaseFirst?.uuid ?? null,
                     team_master_id: teamId,
                     project_master_id: projectId,
-                    active: false,
-                    created_by: 'admin',
                 }
             });
 
-            if(createActivity) {
-                return responseSend(res, 'success', 'Get monitoring team success', createActivity);
+            if(!findAssign) {
+                let createActivity = await prismaClient.active_user_monitoring.create({
+                    data: {
+                        user_master_id: assignedBy,
+                        case_master_id: findCaseFirst?.uuid ?? null,
+                        team_master_id: teamId,
+                        project_master_id: projectId,
+                        remark: remark,
+                        active: false,
+                        created_by: 'admin',
+                    }
+                });
+
+                if(createActivity) {
+                    return responseSend(res, 'success', 'Success', createActivity);
+                } else {
+                    return responseSend(res, 'error', 'Something wrong');
+                }
             } else {
-                return responseSend(res, 'error', 'Something wrong');
+                let updateActivity = await prismaClient.active_user_monitoring.update({
+                    where: {
+                        uuid: findAssign.uuid,
+                    },
+                    data: {
+                        user_master_id: assignedBy,
+                        remark: remark,
+                    }
+                });
+
+                if(updateActivity) {
+                    return responseSend(res, 'success', 'Get monitoring update assigned success', createActivity);
+                } else {
+                    return responseSend(res, 'error', 'Something wrong');
+                }
             }
+
+
         }
 
     } catch (error : any) {
@@ -398,6 +509,34 @@ export const updateActivityCaseSA = async (req: Request, res: Response) => {
     } finally {
         await prismaClient.$disconnect();
 
+    }
+}
+
+export const findExistActivityAssign = async (req: Request, res: Response) => {
+    try {
+        const {userId, taskId, caseId, teamId, projectId} = req.body;
+
+        let findAssign = await prismaClient.active_user_monitoring.findFirst({
+            where : {
+                user_master_id: userId,
+                task_master_id: taskId,
+                case_master_id: caseId,
+                team_master_id: teamId,
+                project_master_id: projectId,
+            }
+        });
+
+        if(findAssign) {
+            return responseSend(res, 'error', 'Activity Found');
+        } else {
+            return responseSend(res, 'success', 'Activity not found');
+        }
+
+
+    } catch (error) {
+        console.log('Something wrong');
+    } finally {
+        await prismaClient.$disconnect();
     }
 }
 
@@ -453,5 +592,104 @@ export const monitoringDone = async (req: Request, res: Response) => {
         console.error('Error update activity :', error);
     } finally {
         await prismaClient.$disconnect();
+    }
+}
+
+export const getMonitoringHistTeam = async (req: Request, res: Response) => {
+    try {
+        const {teamId} = req.body;
+
+        let response = await prismaClient.active_user_monitoring_hist.findMany({
+            where: {
+                team_master_id : teamId,
+                type: 'END',
+            },
+        });
+
+        if(response) {
+            return responseSend(res, 'success', 'Get monitoring team success', response);
+        } else {
+            return responseSend(res, 'error', 'Something wrong');
+        }
+    } catch (error) {
+        console.error('Error update activity :', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}
+
+export const getMonitoringHistUser = async (req: Request, res: Response) => {
+    try {
+        const {userId} = req.body;
+
+        let findUserName = await prismaClient.user_master.findFirst({
+            where: {
+                uuid: userId,
+            }
+        });
+
+        let response = await prismaClient.active_user_monitoring_hist.findMany({
+            where: {
+                user_master_id : findUserName?.full_name,
+                type: 'END',
+            },
+        });
+
+        if(response) {
+            return responseSend(res, 'success', 'Get monitoring user success', response);
+        } else {
+            return responseSend(res, 'error', 'Something wrong');
+        }
+    } catch (error) {
+        console.error('Error update activity :', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}
+
+export const sumDurationTaskUserId = async (req: Request, res: Response) => {
+    try {
+        const {userId} = req.body;
+
+        let responseSumTask = await prismaClient.active_user_monitoring_hist.aggregate({
+            where: {
+                user_master_id: userId,
+                task_master_id: {
+                    not: null,
+                },
+                // case_master_id: null,
+            },
+            _sum: {
+                duration: true,
+            }
+        });
+
+        let responseSumCase = await prismaClient.active_user_monitoring_hist.aggregate({
+            where: {
+                user_master_id: userId,
+                case_master_id: {
+                    not: null,
+                },
+                // task_master_id: null,
+            },
+            _sum: {
+                duration: true,
+            }
+        });
+
+        const sumTask = responseSumTask._sum.duration ?? 0;
+        const sumCase = responseSumCase._sum.duration ?? 0;
+
+        let dataRes = {
+            sumTask : sumTask,
+            sumCase: sumCase,
+        };
+
+        return responseSend(res, 'success', 'Get Sum success', dataRes);
+    } catch (error) {
+        console.error('Error get duration :', error);
+    } finally {
+        await prismaClient.$disconnect();
+
     }
 }
