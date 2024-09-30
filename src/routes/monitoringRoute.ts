@@ -9,6 +9,8 @@ import {
     getMonitoringHistUser,
     getMonitoringWithTeam,
     monitoringDone,
+    sumCountTaskCase,
+    sumCountUserProject,
     sumDurationTaskUserId,
     updateActiveMonitoringEnd,
     updateActiveMonitoringStart,
@@ -43,5 +45,9 @@ MonitoringRoute.post('/findExistActivityAssign', findExistActivityAssign);
 MonitoringRoute.post('/sumDurationTaskUserId', sumDurationTaskUserId);
 
 MonitoringRoute.post('/getMonitoringHistUser', getMonitoringHistUser);
+
+MonitoringRoute.post('/sumCountTaskCase', sumCountTaskCase);
+
+MonitoringRoute.post('/sumCountUserProject', sumCountUserProject);
 
 export default MonitoringRoute

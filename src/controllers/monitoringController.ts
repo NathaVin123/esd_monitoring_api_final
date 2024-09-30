@@ -363,6 +363,30 @@ export const updateActivityTaskSA = async (req: Request, res: Response) => {
 
         console.log('Remark : ',remark);
 
+        let findUserProject = await prismaClient.user_project.findFirst({
+            where: {
+                user_master_id: assignedBy,
+                project_master_id: projectId,
+            }
+        });
+
+        if(findUserProject) {
+            console.log('Project found');
+        } else {
+            let updateUserProject = await prismaClient.user_project.create({
+                data: {
+                    user_master_id : assignedBy,
+                    project_master_id: projectId,
+                    created_at: now,
+                    created_by: 'admin'
+                }
+            });
+
+            if(!updateUserProject) {
+                console.log('Something wrong update project');
+            }
+        }
+
         let updateTask = await prismaClient.task_master.update({
             where: {
                 uuid : uuidTask,
@@ -438,6 +462,30 @@ export const updateActivityCaseSA = async (req: Request, res: Response) => {
         const {uuidCase, teamId, assignedBy, projectId, remark} = req.body;
 
         console.log('Remark : ',remark);
+
+        let findUserProject = await prismaClient.user_project.findFirst({
+            where: {
+                user_master_id: assignedBy,
+                project_master_id: projectId,
+            }
+        });
+
+        if(findUserProject) {
+            console.log('Project found');
+        } else {
+            let updateUserProject = await prismaClient.user_project.create({
+                data: {
+                    user_master_id : assignedBy,
+                    project_master_id: projectId,
+                    created_at: now,
+                    created_by: 'admin'
+                }
+            });
+
+            if(!updateUserProject) {
+                console.log('Something wrong update project');
+            }
+        }
 
         let updateTask = await prismaClient.case_master.update({
             where: {
@@ -690,6 +738,66 @@ export const sumDurationTaskUserId = async (req: Request, res: Response) => {
         console.error('Error get duration :', error);
     } finally {
         await prismaClient.$disconnect();
+    }
+}
 
+export const sumCountTaskCase = async (req: Request, res: Response) => {
+    try {
+        const {userId} = req.body;
+
+        let responseSumTask = await prismaClient.active_user_monitoring.count({
+            where: {
+                user_master_id: userId,
+                // task_master_id: null,
+                case_master_id: null,
+            },
+        });
+
+        let responseSumCase = await prismaClient.active_user_monitoring.count({
+            where: {
+                user_master_id: userId,
+                // case_master_id: null,
+                task_master_id: null,
+            },
+        });
+
+        const sumTask = responseSumTask ?? 0;
+        const sumCase = responseSumCase ?? 0;
+
+        let dataRes = {
+            sumTask : sumTask,
+            sumCase: sumCase,
+        };
+
+        return responseSend(res, 'success', 'Get Sum success', dataRes);
+    } catch (error) {
+        console.error('Error get duration :', error);
+    } finally {
+        await prismaClient.$disconnect();
+    }
+}
+
+export const sumCountUserProject = async (req: Request, res: Response) => {
+    try {
+        const {userId} = req.body;
+
+        let countProject = await prismaClient.user_project.count({
+            where: {
+                user_master_id: userId,
+            }
+        });
+
+        console.log('User Project : ', countProject);
+
+        let dateRes = {
+            countProjectData: countProject,
+        }
+
+        return responseSend(res, 'success', 'Get Count Project Success', dateRes);
+
+    } catch (error) {
+        console.error('Error get project :', error);
+    } finally {
+        await prismaClient.$disconnect();
     }
 }
