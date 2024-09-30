@@ -24,5 +24,5 @@ app.get('/', (req: Request, res: Response) => {
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
-    console.log(`Server run successfully in http://${URL}:${PORT}`)
+    console.log(`Server ESD Monitoring Team run successfully in http://${URL}:${PORT}`)
 })
