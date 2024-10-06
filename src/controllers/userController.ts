@@ -19,6 +19,8 @@ export const CreateUser = async (req: Request, res: Response)=> {
             where: { nik }
         })
 
+        console.log('Test');
+
         console.log(findUserNIK);
         if(findUserNIK) {
             return responseSend(res, 'error', 'User Already Exist!');
