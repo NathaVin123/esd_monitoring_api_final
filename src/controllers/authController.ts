@@ -10,13 +10,14 @@ import sharp from "sharp";
 
 console.log('Auth Controller Init');
 
+console.log('Hello');
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage }).single('profilePhoto');
 
 export const GetToken = async (req: Request, res: Response) => {
     try {
         const token = req.headers['authorization'];
-
         if (!token) {
             return res.status(401).json({ message: 'No token provided' });
         }
